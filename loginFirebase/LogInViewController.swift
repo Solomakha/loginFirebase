@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class LogInViewController: UIViewController {
     @IBOutlet weak var emailTextField: UITextField!
@@ -21,6 +22,7 @@ class LogInViewController: UIViewController {
     
 
     @IBAction func login(_ sender: Any) {
+        validateFields()
     }
     
     @IBAction func createAccaunt(_ sender: Any) {
@@ -30,4 +32,42 @@ class LogInViewController: UIViewController {
         present(vc, animated: true)
     }
     
+    func validateFields(){
+        if emailTextField.text?.isEmpty == true {
+            print("No text in emailfield")
+            return
+        }
+        if passwordTextField.text?.isEmpty == true {
+            print("No text in passwordfield")
+            return
+        }
+        logIn()
+    }
+    
+    func logIn(){
+        Auth.auth().createUser(withEmail: emailTextField.text!, password: passwordTextField.text!)
+        {
+            [weak self] authResult, error in
+            guard let strongSelf = self
+            else
+            {
+                return
+            }
+            
+            if let error = error {
+                print(error.localizedDescription)
+            }
+            self!.checkUserInfo()
+        }
+    }
+    
+    func checkUserInfo(){
+        if Auth.auth().currentUser != nil{
+            print(Auth.auth().currentUser?.uid)
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewController(withIdentifier: "MainScreen")
+            vc.modalPresentationStyle = .overFullScreen
+            self.present(vc, animated: true)
+        }
+    }
 }
